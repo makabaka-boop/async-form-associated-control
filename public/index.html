@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>地区/邮编复合控件 —— Form-Associated 演示</title>
+  <style>
+    body { font-family: system-ui, "PingFang SC", "Microsoft YaHei", sans-serif; margin: 24px; color: #222; }
+    h1 { font-size: 20px; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    form { border: 1px solid #ccc; border-radius: 8px; padding: 16px; background: #fafafa; }
+    form h2 { margin: 0 0 12px; font-size: 16px; }
+    label { display: block; margin: 10px 0; font-size: 14px; }
+    input[type=text] { padding: 4px; }
+    .buttons { margin-top: 12px; display: flex; gap: 8px; }
+    button { padding: 5px 12px; cursor: pointer; }
+    .panel { margin-top: 20px; border: 1px solid #ccc; border-radius: 8px; padding: 12px; }
+    #log { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12px; white-space: pre-wrap; max-height: 300px; overflow: auto; background: #111; color: #9fe88f; padding: 10px; border-radius: 6px; }
+    .debug { background: #fff8e1; border-color: #e0c36d; }
+    .debug button { margin-right: 8px; }
+    .orphan { border: 1px dashed #888; border-radius: 8px; padding: 12px; margin-top: 16px; }
+    fieldset[disabled] { opacity: .7; }
+    small { color: #666; }
+  </style>
+</head>
+<body>
+  <h1>地区/邮编复合控件（ElementInternals 原生表单参与，无隐藏 input）</h1>
+  <div class="grid">
+    <!-- 真实表单 1：发货单 -->
+    <form id="shipping-form" data-tag="shipping" action="/submit-sink" method="post" target="submit-sink">
+      <h2>发货单（form#shipping-form）</h2>
+      <fieldset id="ship-fieldset">
+        <legend>发货地区与邮编（必填，name=<code>shipAddress</code>，单个 JSON 值）</legend>
+        <region-postal-field
+          id="ship-field"
+          name="shipAddress"
+          required
+          value='{"region":"上海市","postal":"200120"}'></region-postal-field>
+      </fieldset>
+      <label>联系人（原生必填控件，用来验证协调器不绕开其他控件校验）
+        <input id="ship-contact" name="contact" type="text" required />
+      </label>
+      <div class="buttons">
+        <button type="submit" id="ship-submit" name="action" value="ship">提交发货单</button>
+        <button type="reset" id="ship-reset">重置</button>
+        <button type="button" id="ship-toggle-fieldset">禁用/启用 fieldset</button>
+      </div>
+    </form>
+
+    <!-- 真实表单 2：账单 -->
+    <form id="billing-form" data-tag="billing" action="/submit-sink" method="post" target="submit-sink">
+      <h2>账单（form#billing-form）</h2>
+      <label>账单地区与邮编（选填，name=<code>billAddress</code>）
+        <region-postal-field id="bill-field" name="billAddress"></region-postal-field>
+      </label>
+      <label>账单抬头（原生必填）
+        <input id="bill-title" name="title" type="text" required />
+      </label>
+      <div class="buttons">
+        <button type="submit" id="bill-submit" name="action" value="bill">提交账单</button>
+        <button type="reset" id="bill-reset">重置</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- 初始不属于任何表单的控件：演示/测试 form 属性改属 -->
+  <div class="orphan">
+    <strong>游离控件</strong>（初始无表单，可改属到任意一张表单；name=<code>extraAddress</code>）
+    <p>
+      <region-postal-field id="orphan-field" name="extraAddress" required></region-postal-field>
+    </p>
+    <button type="button" id="attach-ship">归属 → 发货单</button>
+    <button type="button" id="attach-bill">归属 → 账单</button>
+    <button type="button" id="attach-none">脱离表单</button>
+  </div>
+
+  <div class="panel debug">
+    <strong>校验 Worker 调试（同源 Worker + 仓库内固定许可表，无外部请求）</strong>
+    <p>
+      <button type="button" id="stall-on">挂起 Worker（开始控制返回顺序）</button>
+      <button type="button" id="stall-off">恢复 Worker（自动延迟返回）</button>
+      <button type="button" id="release-all">放行全部挂起结果</button>
+      <button type="button" id="clear-log">清空日志</button>
+    </p>
+    <small>挂起期间发出的校验会保存在 Worker 中，按“放行”顺序返回，可复现迟到旧响应。</small>
+  </div>
+
+  <div class="panel">
+    <strong>真实 submit / formdata 流程日志</strong>
+    <small>表单 target 指向同源隐藏 iframe（/submit-sink），submit→formdata 完整真实发生且不导航主页面。</small>
+    <div id="log"></div>
+  </div>
+
+  <!-- 同源提交落点：保证真实 formdata 流程发生，同时避免主页面导航 -->
+  <iframe
+    name="submit-sink"
+    title="submit sink"
+    style="width:100%;height:120px;border:1px solid #ddd;margin-top:8px"
+  ></iframe>
+
+  <script type="module" src="/region-postal-field.js"></script>
+  <script type="module" src="/submit-coordinator.js"></script>
+  <script type="module" src="/demo.js"></script>
+</body>
+</html>

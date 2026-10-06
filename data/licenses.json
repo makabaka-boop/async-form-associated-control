@@ -1,0 +1,21 @@
+{
+  "note": "固定演示许可表：仅由同源校验 Worker 读取，不请求任何外部服务。",
+  "licenses": [
+    { "region": "上海市", "postal": "200000" },
+    { "region": "上海市", "postal": "200120" },
+    { "region": "上海市", "postal": "200135" },
+    { "region": "北京市", "postal": "100000" },
+    { "region": "北京市", "postal": "100080" },
+    { "region": "北京市", "postal": "100044" },
+    { "region": "广州市", "postal": "510000" },
+    { "region": "广州市", "postal": "510620" },
+    { "region": "杭州市", "postal": "310000" },
+    { "region": "杭州市", "postal": "310013" }
+  ],
+  "postalRules": [
+    { "region": "上海市", "pattern": "^2\\d{5}$" },
+    { "region": "北京市", "pattern": "^1[0-2]\\d{4}$" },
+    { "region": "广州市", "pattern": "^51\\d{4}$" },
+    { "region": "杭州市", "pattern": "^31\\d{4}$" }
+  ]
+}
